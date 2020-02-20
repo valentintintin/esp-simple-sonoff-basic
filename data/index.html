@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<head>
+<title>PixelRupteur</title>
+<meta content="width=device-width,initial-scale=1" name="viewport">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    $(function() {
+        const ESP = "/";
+        const interrupteurElement = $("#interrupteur");
+        interrupteurElement.click(function() {
+            $.post(ESP + "toggle", function(state) {
+                refreshHtml(state);
+            }, "json").fail(function() {
+                error();
+            });
+        });
+
+        function getStatus() {
+            $.post(ESP + "", function(state) {
+                refreshHtml(state);
+            }, "json").fail(function() {
+                error();
+            });
+        }
+
+        function refreshHtml(state) {
+            interrupteurElement.removeAttr("disabled");
+            if (state) {
+                interrupteurElement.removeClass("off");
+                interrupteurElement.addClass("on");
+                interrupteurElement.html("Eteindre");
+            } else {
+                interrupteurElement.removeClass("on");
+                interrupteurElement.addClass("off");
+                interrupteurElement.text("Allumer");
+            }
+        }
+
+        function error() {
+            interrupteurElement.removeClass("on");
+            interrupteurElement.removeClass("off");
+            interrupteurElement.html("Erreur !");
+            interrupteurElement.attr("disabled", true);
+        }
+        getStatus();
+        setInterval(function() {
+            getStatus()
+        }, 1000);
+    });
+</script>
+<style>
+    body {
+        text-align: center;
+        margin: auto
+    }
+
+    .on {
+        background: green!important
+    }
+
+    .off {
+        background: red!important
+    }
+
+    #interrupteur {
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 150px;
+        height: 150px;
+        border-radius: 35%;
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+        background: gray;
+        border: 0
+    }
+
+    #interrupteur:hover:enabled {
+        font-size: 25px;
+        cursor: pointer
+    }
+
+    #infos {
+        margin-top: 200px
+    }
+
+    #infos a {
+        display: block
+    }
+</style>
+</head>
+<body>
+<h1>PixelRupteur</h1>
+<button autofocus id="interrupteur" type="button"></button>
+<details id="infos">
+    <summary>Autres commandes</summary>
+    <a href="/toggle">Basculer (GET et POST)</a>
+    <a href="/on">Allumer (GET et POST)</a>
+    <a href="/off">Eteindre (GET et POST)</a>
+    <a href="/infos">Memoire + Uptime en JSON (GET)</a>
+    <a href="/reset">Reset l'ESP (POST)</a>
+    <form method="POST" action="/update" enctype="multipart/form-data">
+        <input type="file" name="update"><input type="submit" value="Update" disabled>
+    </form>
+</detail>
+</body>
+</html>
